@@ -1,0 +1,4 @@
+odoo_pg_pass
+__pycache__
+*.conf
+*.dump

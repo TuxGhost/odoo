@@ -1,0 +1,64 @@
+version: "3.9"
+
+networks: 
+  kudasoft:
+
+services:
+  odoo160:
+    hostname: odoo160
+    image: odoo:17.0
+    restart: no
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+    ports:
+      - "8169:8069"    
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    networks:
+      - kudasoft
+
+  db:
+    hostname: postgres15
+    image: postgres:15
+    restart: "no"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo      
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - kudasoft    
+    ports:
+      - "5532:5432"
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+      
+  ppgadmin:
+    hostname: pgadmin4
+    image: dpage/pgadmin4:8.4
+    restart: "no"
+    networks:
+      - kudasoft       
+    ports:
+      - "8081:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: peter.kuda@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: odoo
+    secrets:
+      - postgresql_password  
+    depends_on:
+      - db
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+
+secrets:
+  postgresql_password:
+    file: odoo_pg_pass
+    
